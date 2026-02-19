@@ -17,6 +17,14 @@ class BoardSearchModel(BaseModel):
 class BoardEditModel(BaseModel):
    content: str  = Field(..., title="내용", description="게시글에서 수정할 내용 입니다.")
 
+# 댓글 전송을 위한 모델
+class ReplyAddModel(BaseModel):
+    content: str = Field(..., title="내용", description="댓글 내용입니다.")
+    board_no: int = Field(..., title="게시글 번호")
+
+class CommentEditModel(BaseModel):
+  content: str = Field(..., title="댓글 내용")
+
 
 @router.post("/add")  
 def board(boardAddModel: BoardAddModel, payload=Depends(get_user), user: str = Cookie(None)):
@@ -82,6 +90,81 @@ def board(no: int, payload = Depends(get_user)):
     return {"status": True, "result": result, "role": role}
   return {"status": False, "message": "요청하신 게시글은 존재 하지 않습니다."}
 
+
+  # ✅ 1. 댓글 목록 조회 (프론트엔드의 load_reply 대응)
+@router.post("/{no}/comment")
+def get_replies(no: int, payload = Depends(get_user)):
+    # reply 테이블과 user 테이블을 조인하여 댓글 목록을 가져옵니다.
+    sql = f"""
+        SELECT r.`no`, r.`content`, u.`name`, r.`reg_date`, r.`user_no`
+          FROM mini.`reply` AS r
+         INNER JOIN mini.`user` AS u ON (r.`user_no` = u.`no`)
+         WHERE r.`board_no` = {no} AND r.`del_yn` = 0
+         ORDER BY r.`no` DESC
+    """
+    result = findAll(sql)
+    
+    # 각 댓글의 작성자가 현재 로그인한 사용자인지 확인하여 role 부여
+    for item in result:
+        if payload and int(payload["sub"]) == item["user_no"]:
+            item['role'] = True
+        else:
+            item['role'] = False
+            
+    return {"status": True, "result": result}
+
+# ✅ 2. 댓글 등록 (프론트엔드의 reply_submit 대응)
+@router.post("/{no}/comment/add")
+def add_reply(no: int, reply: ReplyAddModel, payload = Depends(get_user)):
+    if not payload:
+        return {"status": False, "message": "로그인이 필요합니다."}
+
+    user_no = payload["sub"]
+    
+    # reply 테이블에 데이터를 저장합니다.
+    sql = f"""
+        INSERT INTO mini.`reply` (`content`, `board_no`, `user_no`)
+        VALUES ('{reply.content}', {no}, {user_no})
+    """
+    res = save(sql)
+    
+    if res:
+        return {"status": True, "message": "댓글이 등록되었습니다."}
+    return {"status": False, "message": "댓글 등록 중 오류가 발생했습니다."}
+
+# ✅ 3. 댓글 삭제 (프론트엔드의 reply_delete 대응)
+@router.delete("/{no}/comment/{comment_no}")
+def delete_reply(no: int, comment_no: int, payload = Depends(get_user)):
+    if not payload:
+        return {"status": False, "message": "권한이 없습니다."}
+
+    # 본인의 댓글만 삭제할 수 있도록 user_no 조건을 추가합니다.
+    user_no = payload["sub"]
+    sql = f"UPDATE mini.`reply` SET `del_yn` = 0 WHERE `no` = {comment_no} AND `user_no` = {user_no}"
+    
+    res = save(sql)
+    if res:
+        return {"status": True, "message": "댓글이 삭제되었습니다."}
+    return {"status": False, "message": "댓글 삭제 실패"}
+
+# 댓글 수정
+@router.patch("/{no}/comment/{comment_no}")
+def edit_comment(no: int, comment_no: int, commentEditModel: CommentEditModel, payload=Depends(get_user)):
+  if not payload:
+    return {"status": False, "message": "로그인이 필요합니다."}
+
+  user_no = int(payload["sub"])
+
+  check = findOne(f"SELECT user_no FROM mini.reply WHERE no={comment_no} AND del_yn=0")
+  if not check or check["user_no"] != user_no:
+    return {"status": False, "message": "권한이 없습니다."}
+
+  result = save(f"UPDATE mini.reply SET content='{commentEditModel.content}', mod_date=NOW() WHERE no={comment_no}")
+  if result:
+    return {"status": True, "message": "댓글 수정 완료"}
+  return {"status": False, "message": "댓글 수정 실패"}
+
+
 @router.patch("/edit")
 def edit_data(no: int, boardEditModel: BoardEditModel, playload = Depends(get_user)):
    if playload:
@@ -100,3 +183,6 @@ def board(no: int, payload = Depends(get_user)):
     if save(sql):
       return {"status": True, "message": "게시글 삭제가 정상 처리가 되었습니다."}
   return {"status": False, "message": "게시글 삭제 중 오류가 발생 되었습니다."}
+
+
+

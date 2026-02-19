@@ -30,7 +30,8 @@ const AuthProvider = ({ children }) => {
   const refreshAuth = async () => {
     try {
       const res = await api.get("/auth/me"); 
-      setIsLogin(!!res.data?.status);
+      setIsLogin(res.data?.status || false);
+      setProfileImg(res.data?.new_name || "")
     } catch (e) {
       setIsLogin(false);
     } finally {

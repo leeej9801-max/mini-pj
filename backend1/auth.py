@@ -15,6 +15,21 @@ def get_user(user: str = Cookie(None)):
       return jwt.decode(result["token"], settings.secret_key, algorithms=settings.algorithm)
   return None
 
+def get_info(user: str = Cookie(None)):
+  if user:
+    sql = f"""
+    SELECT u.* 
+    FROM mini.`user` AS u 
+    INNER JOIN mini.`login` AS l
+    ON (l.`id` = '{user}'
+    AND u.no = l.user_no)
+    WHERE u.del_yn = 0;
+    """
+    result = findOne(sql)
+    if result:
+      return result
+  return None
+
 def set_token(no: int):
   try:
     result = findOne(f"SELECT `no` FROM mini.user WHERE `email` = '{no}'")
@@ -36,7 +51,7 @@ def set_token(no: int):
   return None
 
 @router.get("/me")
-def me(payload = Depends(get_user)):
+def me(payload = Depends(get_info)):
     if payload:
-        return {"status": True}
+        return {"status": True, "new_name": payload['new_name']}
     return {"status": False}

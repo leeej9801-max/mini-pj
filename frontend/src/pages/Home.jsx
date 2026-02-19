@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { api } from '@utils/network.js'
 import { useNavigate } from "react-router";
-import { useAuth } from '@hooks/AuthProvider.jsx'
+import { useAuth } from '@hooks/Authprovider.jsx'
 
 const Pagination = ({ total, page, pagingEvent }) => {
   return (

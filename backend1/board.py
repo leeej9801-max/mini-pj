@@ -76,7 +76,7 @@ def board(boardSearchModel: BoardSearchModel):
 
 @router.get("/{no}")
 def board(no: int, payload = Depends(get_user)):
-  sql = f"""SELECT b.`no`, b.`title`, b.`content`, u.`name`, b.`user_no`
+  sql = f"""SELECT b.`no`, b.`title`, b.`content`, u.`name`, b.`user_no`, b.`reg_date`
       FROM mini.`board` AS b
     INNER JOIN mini.`user` AS u
         ON (b.`user_no` = u.`no` AND u.`del_yn` = 0)
@@ -98,7 +98,7 @@ def board(no: int, payload = Depends(get_user)):
 def get_replies(no: int, payload = Depends(get_user)):
     # reply 테이블과 user 테이블을 조인하여 댓글 목록을 가져옵니다.
     sql = f"""
-        SELECT r.`no`, r.`content`, u.`name`, r.`reg_date`, r.`user_no`
+        SELECT r.`no`, r.`content`, u.`name`, r.`reg_date`, r.`user_no`, u.`new_name`
           FROM mini.`reply` AS r
          INNER JOIN mini.`user` AS u ON (r.`user_no` = u.`no`)
          WHERE r.`board_no` = {no} AND r.`del_yn` = 0

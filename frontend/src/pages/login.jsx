@@ -14,8 +14,9 @@ const Login = () => {
     api
       .post("login", { email })
       .then((res) => {
-        if (res.data.status) alert("메일 발송 요청 완료");
-        else alert("메일 발송 실패");
+        if (res.data.status) {
+          alert("메일 발송 요청 완료");
+        } else alert("메일 발송 실패");
       })
       .catch((err) => {
         console.error(err);

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { api } from '@/utils/network.js'; 
+import { api, BASE_URL } from '@utils/network.js'
 import { useAuth } from '@/hooks/Authprovider.jsx';
 
 // ✅ 날짜 포맷 함수
@@ -58,6 +58,13 @@ const Board_view = () => {
                 if (res.data.status) set_reply(res.data.result)
             })
             .catch(err => console.error(err))
+    }
+
+    const getUrl = (new_name) => {
+        if (new_name)
+            return `${BASE_URL}/uploads/${new_name}`
+        else
+            return "/img_01.jpg"
     }
 
     useEffect(() => {
@@ -196,7 +203,7 @@ const Board_view = () => {
                 {reply && reply.map((c) => (
                     <div key={c.no} className="d-flex align-items-start mb-3 pb-3 border-bottom">
                         <img 
-                            src="/img_01.jpg"
+                            src={getUrl(c?.new_name || "")}
                             alt="profile" 
                             className="rounded-circle me-3" 
                             style={{ width: "50px", height: "50px", objectFit: "cover" }} 

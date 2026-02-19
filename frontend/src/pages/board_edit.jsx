@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router"
 import { api } from '@/utils/network.js';
-import {useAuth} from '@hooks/AuthProvider.jsx'
+import {useAuth} from '@hooks/Authprovider.jsx'
 
 const Board_edit = () =>{
     
@@ -80,7 +80,7 @@ return (
                         <button type="submit" className="btn btn-primary">저장</button>
                     </div>
                     <div className="p-2 flex-fill d-grid">
-                        <button type="button" className="btn btn-secondary" onClick={() => navigate("/")}>취소</button>
+                        <button type="button" className="btn btn-secondary" onClick={() => navigate(`/boardview/${no}`)}>취소</button>
                     </div>
                 </div>
             </form>

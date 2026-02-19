@@ -47,24 +47,19 @@ COMMENT='게시판'
 COLLATE='utf8mb4_unicode_ci'
 ENGINE=InnoDB
 ;
-
-CREATE TABLE `reply` (
-	`no` INT(11) NOT NULL AUTO_INCREMENT COMMENT '번호',
-	`email` VARCHAR(255) NOT NULL COMMENT '이메일' COLLATE 'utf8mb4_unicode_ci',
-	`title` VARCHAR(40) NOT NULL COMMENT '제목' COLLATE 'utf8mb4_unicode_ci',
-	`content` VARCHAR(255) NULL DEFAULT NULL COMMENT '내용' COLLATE 'utf8mb4_unicode_ci',
-	`del_yn` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '삭제여부(0:활성화, 1: 비활성화)',
-	`user_no` INT(11) NOT NULL COMMENT '작성자 번호(user.no)',
-	`reg_date` DATETIME NOT NULL DEFAULT current_timestamp() COMMENT '게시글 등록 일자',
-	`mod_date` DATETIME NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT '게시글 수정 일자',
-	`board_no` INT(100) NULL DEFAULT NULL COMMENT '게시글 번호',
-	PRIMARY KEY (`no`) USING BTREE,
-	INDEX `IDX_board_user` (`user_no`) USING BTREE,
-	INDEX `FK_reply_board` (`board_no`) USING BTREE,
-	CONSTRAINT `FK_board_user` FOREIGN KEY (`user_no`) REFERENCES `user` (`no`) ON UPDATE NO ACTION ON DELETE NO ACTION,
-	CONSTRAINT `FK_reply_board` FOREIGN KEY (`board_no`) REFERENCES `board` (`no`) ON UPDATE NO ACTION ON DELETE NO ACTION
-)
-COMMENT='게시판'
+CREATE TABLE mini.reply (
+  no       INT          NOT NULL AUTO_INCREMENT COMMENT '번호',
+  content  VARCHAR(255) NOT NULL                COMMENT '내용',
+  del_yn   TINYINT      NOT NULL DEFAULT '0'    COMMENT '삭제여부(0:활성화, 1:삭제)',
+  user_no  INT          NOT NULL                COMMENT '작성자 번호(user.no)',
+  reg_date DATETIME     NOT NULL DEFAULT current_timestamp() COMMENT '댓글 등록 일자',
+  mod_date DATETIME     NOT NULL DEFAULT current_timestamp() COMMENT '댓글 수정 일자',
+  board_no INT          NOT NULL                COMMENT '게시글 번호(board.no)',
+  PRIMARY KEY (no),
+  FOREIGN KEY (user_no)  REFERENCES mini.user(no),
+  FOREIGN KEY (board_no) REFERENCES mini.board(no)
+);
+COMMENT='댓글'
 COLLATE='utf8mb4_unicode_ci'
 ENGINE=InnoDB
 ;

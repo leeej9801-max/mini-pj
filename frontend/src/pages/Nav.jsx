@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { useAuth } from "@hooks/AuthProvider.jsx";
+import { useAuth } from "@hooks/Authprovider.jsx";
 import { BASE_URL } from "@utils/network.js";
 
 const Nav = () => {

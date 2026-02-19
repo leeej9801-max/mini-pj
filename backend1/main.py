@@ -9,7 +9,7 @@ import auth
 import home
 import upload
 
-origins = [  "http://localhost:5173" ]
+origins = [ settings.react_url ]
 
 app = FastAPI()
 

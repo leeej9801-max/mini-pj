@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from "react-router";
-import { useAuth } from '@hooks/AuthProvider.jsx'
+import { useAuth } from '@hooks/Authprovider.jsx'
 import { api, formApi, BASE_URL } from '@utils/network.js'
 
 const UserEdit = () => {
@@ -132,12 +132,12 @@ const UserEdit = () => {
         <div className="d-flex">
           <div className="p-2 flex-fill">
             <div className="form-check">
-              <input type="radio" checked={gender} onChange={() => setGender(true)} /> 남성
+              <input type="radio" checked={gender} readOnly /> 남성
             </div>
           </div>
           <div className="p-2 flex-fill">
             <div className="form-check">
-              <input type="radio" checked={!gender} onChange={() => setGender(false)} /> 여성
+              <input type="radio" checked={!gender} readOnly /> 여성
             </div>
           </div>
         </div>

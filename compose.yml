@@ -1,22 +1,105 @@
 services:
+  backend1:
+    container_name: backend1.com
+    image: uv:1
+    ports:
+      - 8001:8000
+    networks:
+      - my-bridge
+    depends_on:
+      - maria
+      - kafka
+      - redis
+    working_dir: /workspace
+    volumes:
+      # - ./backend1/.env:/workspace/.env:ro
+      # - ./backend1/main.py:/workspace/main.py:rw
+      # - ./backend1/src:/workspace/src:rw
+      # - ./backend1/pyproject.toml:/workspace/pyproject.toml:ro
+      # - ./backend1/uv.lock:/workspace/uv.lock:ro
+      - ./backend1:/workspace
+      - uploads:/workspace/uploads:rw
+    command: ["sleep", "infinity"]
+
+  backend2:
+    container_name: backend2.com
+    image: uv:1
+    ports:
+      - 8002:8000
+    networks:
+      - my-bridge
+    depends_on:
+      - maria
+      - kafka
+      - redis
+    working_dir: /workspace
+    volumes:
+      - ./backend2/.env:/workspace/.env:ro
+      - ./backend2/main.py:/workspace/main.py:rw
+      - ./backend2/settings.py:/workspace/settings.py:ro
+      - ./backend2/pyproject.toml:/workspace/pyproject.toml:ro
+      - ./backend2/uv.lock:/workspace/uv.lock:ro
+    command: ["sleep", "infinity"]
+
+  frontend:
+    container_name: frontend.com
+    image: node:24.13.0
+    ports:
+      - 80:5173
+    networks:
+      - my-bridge
+    working_dir: /workspace
+    volumes:
+      - ./frontend/.env:/workspace/.env:ro
+      - ./frontend/public:/workspace/public:ro
+      - ./frontend/src:/workspace/src:rw
+      - ./frontend/eslint.config.js:/workspace/eslint.config.js:ro
+      - ./frontend/index.html:/workspace/index.html:ro
+      - ./frontend/package.json:/workspace/package.json:ro
+      - ./frontend/vite.config.js:/workspace/vite.config.js:ro
+    command: ["sleep", "infinity"]
+  
+  maria:
+    container_name: maria
+    image: mariadb:12.1.2
+    restart: always
+    ports:
+      - 3306:3306
+    networks:
+      - my-bridge
+    volumes:
+      - ./mariadb/conf.d:/etc/mysql/conf.d:ro
+      - ./mariadb/initdb.d:/docker-entrypoint-initdb.d:ro
+      - mysql:/var/lib/mysql:rw
+    environment:
+      - MARIADB_HOST=localhost
+      - MARIADB_PORT=3306
+      - MARIADB_ROOT_PASSWORD=1234
+      - MARIADB_DATABASE=mini
+      - TZ=Asia/Seoul
+      - LC_ALL:en_US.UTF-8
+  
   kafka:
     container_name: kafka
     image: apache/kafka:4.0.1
     restart: always
     ports:
       - 9092:9092
+      - 9094:9094
     networks:
       - my-bridge
-    working_dir: /opt/kafka/bin/
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:9094,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://192.168.0.230:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
 
   redis:
     container_name: redis
@@ -27,76 +110,10 @@ services:
     networks:
       - my-bridge
 
-  mariadb:
-    container_name: mariadb
-    image: mariadb:12.1.2
-    restart: always
-    ports:
-      - 3306:3306
-    networks:
-      - my-bridge
-    volumes:
-      - ./mariadb/conf.d:/etc/mysql/conf.d:ro
-      - ./mariadb/data:/var/lib/mysql:rw
-      - ./mariadb/initdb.d:/docker-entrypoint-initdb.d:ro
-    environment:
-      - MARIADB_HOST=localhost
-      - MARIADB_PORT=3306
-      - MARIADB_ROOT_PASSWORD=1234
-      - MARIADB_DATABASE=edu
-      - TZ=Asia/Seoul
-      - LC_ALL:en_US.UTF-8
-
-  app1:
-    container_name: backend1.com
-    image: uv:1
-    ports:
-      - 8001:8000
-    networks:
-      - my-bridge
-    depends_on:
-      - kafka
-      - redis
-      - mariadb
-    working_dir: /workspace
-    volumes:
-      - ./backend1:/workspace
-    command: ["sleep", "infinity"]
-    # command: ["uv", "run", "fastapi", "run"]
-
-  backend2:
-    container_name: backend2.com
-    image: uv:1
-    ports:
-      - 8002:8000
-    networks:
-      - my-bridge
-    depends_on:
-      - kafka
-      - redis
-      - mariadb
-    working_dir: /workspace
-    volumes:
-      - ./backend2:/workspace
-    command: ["sleep", "infinity"]
-    # command: ["uv", "run", "fastapi", "run"]
-  
-  frontend:
-    container_name: frontend.com
-    image: node:24.13.0
-    ports:
-      - 80:5173
-    networks:
-      - my-bridge
-    depends_on:
-      - backend1
-      - backend2
-    working_dir: /workspace
-    volumes:
-      - ./frontend:/workspace
-    command: ["sleep", "infinity"]
-    # command: [ "npm", "run", "dev" ]
-
 networks:
   my-bridge:
     driver: bridge
+
+volumes:
+  uploads:
+  mysql:

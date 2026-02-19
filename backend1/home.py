@@ -32,16 +32,9 @@ router = APIRouter(tags=["회원관리"])
 @router.post("/check_email")
 def check_email(email: EmailStr):
     sql = f"""
-<<<<<<< HEAD
       SELECT COUNT(*) AS state
       FROM mini.`user`
       WHERE `del_yn` = '0' and `email`='{email}'
-=======
-        SELECT COUNT(*) AS state
-        FROM mini.`user`
-        WHERE `email` = '{email}'
-        AND `del_yn` = 0
->>>>>>> 6a010fd7baa697dc8b5bc9f7e23c9f8103bece1d
     """
     result = findOne(sql)
 

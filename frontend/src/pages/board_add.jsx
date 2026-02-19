@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate} from "react-router" 
 import { api } from '@utils/network.js'
-import { useAuth } from '@hooks/AuthProvider.jsx'
+import { useAuth } from '@hooks/Authprovider.jsx'
 
 
    const Board_add = () =>{

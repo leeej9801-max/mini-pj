@@ -14,6 +14,7 @@ class BoardSearchModel(BaseModel):
   page: int = Field(..., title="페이지번호", description="게시글 페이징 현제 위치 정보 입니다.")
   search: str = Field(..., title="제목 검색", description="게시글에서 제목 검색 값 입니다.")
 
+
 class BoardEditModel(BaseModel):
    content: str  = Field(..., title="내용", description="게시글에서 수정할 내용 입니다.")
 
@@ -162,7 +163,7 @@ def edit_comment(no: int, comment_no: int, commentEditModel: CommentEditModel, p
   result = save(f"UPDATE mini.reply SET content='{commentEditModel.content}', mod_date=NOW() WHERE no={comment_no}")
   if result:
     return {"status": True, "message": "댓글 수정 완료"}
-  return {"status": False, "message": "댓글 수정 실패"}
+    return {"status": False, "message": "댓글 수정 실패"}
 
 
 @router.patch("/edit")
@@ -183,6 +184,3 @@ def board(no: int, payload = Depends(get_user)):
     if save(sql):
       return {"status": True, "message": "게시글 삭제가 정상 처리가 되었습니다."}
   return {"status": False, "message": "게시글 삭제 중 오류가 발생 되었습니다."}
-
-
-

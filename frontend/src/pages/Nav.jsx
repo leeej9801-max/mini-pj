@@ -5,6 +5,7 @@ import { BASE_URL } from "@utils/network.js";
 const Nav = () => {
   const { isLogin, removeAuth, profileImg } = useAuth();
 
+
   const imageUrl = profileImg
     ? `${BASE_URL}/uploads/${profileImg}?t=${Date.now()}`
     : "/img_01.jpg";

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from "react-router";
 import { useAuth } from '@hooks/AuthProvider.jsx'
-import { api } from '@utils/network.js'
+import { api, BASE_URL } from '@utils/network.js'
 
 const UserView = () =>{
 	const [name, setName] = useState("");
@@ -9,21 +9,16 @@ const UserView = () =>{
 	const [regDate, setRegDate] = useState("");
 	const [modDate, setModDate] = useState("");
 	const [gender, setGender] = useState(true);
-	const [profile, setProfile] = useState(0)
+	const [profileImg, setProfileImg] = useState("")
 	const { clearAuth, checkAuth } = useAuth()
 	const navigate = useNavigate()
 
-	const path = "http://localhost:8001/"
-
- 
-  const getUrl = () => {
-	// profile 번호가 있으면 서버 이미지
-	if (profile && profile > 0)
-	  return `${path}/profile?no=${profile}`
-	//  없으면 기본 이미지
+	const getUrl = () => {
+	if (profileImg)
+		return `${BASE_URL}/uploads/${profileImg}`
 	else
-	  return "/img_01.jpg"
-  }
+		return "/img_01.jpg"
+	}
 
    // deleteEvent 누를 때 사용자 탈퇴가 되도록 FastAPI에 요청 보내서 업데이트 되도록 함
 	const deleteEvent = () => {   
@@ -39,10 +34,10 @@ const UserView = () =>{
   const setData = data => {
     setName(data.name)
     setEmail(data.email)
-    setGender(data.gender)
+    setGender(data.gender === 1)
     setRegDate(data.regDate)
     setModDate(data.modDate)
-	setProfile(data.profile ?? 0)
+	setProfileImg(data.new_name ?? "")
   }
 
   // 컴포넌트가 처음 화면에 나타날 떄 자동 실행되는 데 

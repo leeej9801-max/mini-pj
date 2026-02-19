@@ -8,7 +8,6 @@ router = APIRouter(prefix="/user", tags=["사용자"])
 class UserModel(BaseModel):
   email: EmailStr = Field(..., title="이메일 주소", description="사용자 식별를 위한 이메일 주소 입니다.")
 
-
 @router.post("")
 def user(payload = Depends(get_user)):
   if payload:

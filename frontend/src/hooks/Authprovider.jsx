@@ -7,7 +7,25 @@ export const AuthContext = createContext(null);
 const AuthProvider = ({ children }) => {
   const [isLogin, setIsLogin] = useState(false);
   const [loading, setLoading] = useState(true); 
+  const [profileImg, setProfileImg] = useState("")
   const navigate = useNavigate();
+
+  // 🔥 사용자 정보 + 프로필 이미지 가져오기
+  const fetchUser = async () => {
+    try {
+      const res = await api.post("/user");
+      if (res.data?.status) {
+        setIsLogin(true);
+        setProfileImg(res.data.result?.new_name ?? "");
+      } else {
+        setIsLogin(false);
+        setProfileImg("");
+      }
+    } catch (e) {
+      setIsLogin(false);
+      setProfileImg("");
+    }
+  };
 
   const refreshAuth = async () => {
     try {
@@ -33,6 +51,7 @@ const AuthProvider = ({ children }) => {
 
   const clearAuth = () => {
     setIsLogin(false);
+    setProfileImg("");   // 🔥 로그아웃 시 초기화
     navigate("/");
   };
 
@@ -49,7 +68,7 @@ const AuthProvider = ({ children }) => {
   if (loading) return null;
 
   return (
-    <AuthContext.Provider value={{ isLogin, setAuth, removeAuth, clearAuth, checkAuth, refreshAuth }}>
+    <AuthContext.Provider value={{ isLogin, profileImg, setAuth, setProfileImg, removeAuth, clearAuth, checkAuth, refreshAuth }}>
       {children}
     </AuthContext.Provider>
   );

@@ -22,7 +22,9 @@ const App = () => {
     {path: "*", element: <NotFound />},
     {path: "/boardedit/:no", element: <Board_edit />},
     {path: "/boardview/:no", element: <Board_view />},
+
     {path: "/boardadd", element: <Board_add />}
+
   ]
   return (
     <>

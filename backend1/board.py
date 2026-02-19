@@ -14,6 +14,9 @@ class BoardSearchModel(BaseModel):
   page: int = Field(..., title="페이지번호", description="게시글 페이징 현제 위치 정보 입니다.")
   search: str = Field(..., title="제목 검색", description="게시글에서 제목 검색 값 입니다.")
 
+class BoardEditModel(BaseModel):
+   content: str  = Field(..., title="내용", description="게시글에서 수정할 내용 입니다.")
+
 
 @router.post("/add")  
 def board(boardAddModel: BoardAddModel, payload=Depends(get_user), user: str = Cookie(None)):
@@ -51,8 +54,8 @@ def board(boardSearchModel: BoardSearchModel):
     sql2 = sql = f"""SELECT count(*) as total 
       FROM mini.`board` AS b
     INNER JOIN mini.`user` AS u
-        ON (b.`user_no` = u.`no` AND u.`delYn` = 0)
-    WHERE b.`delYn` = 0 
+        ON (b.`user_no` = u.`no` AND u.`del_yn` = 0)
+    WHERE b.`del_yn` = 0 
       AND b.`title` LIKE '%{boardSearchModel.search}%'
     """
     total = findOne(sql2)
@@ -66,8 +69,8 @@ def board(no: int, payload = Depends(get_user)):
   sql = f"""SELECT b.`no`, b.`title`, b.`content`, u.`name`, b.`user_no`
       FROM mini.`board` AS b
     INNER JOIN mini.`user` AS u
-        ON (b.`user_no` = u.`no` AND u.`delYn` = 0)
-    WHERE b.`delYn` = 0 
+        ON (b.`user_no` = u.`no` AND u.`del_yn` = 0)
+    WHERE b.`del_yn` = 0 
       AND b.`no` = {no}
   """
   result = findOne(sql)
@@ -78,3 +81,22 @@ def board(no: int, payload = Depends(get_user)):
       role = False
     return {"status": True, "result": result, "role": role}
   return {"status": False, "message": "요청하신 게시글은 존재 하지 않습니다."}
+
+@router.patch("/edit")
+def edit_data(no: int, boardEditModel: BoardEditModel, playload = Depends(get_user)):
+   if playload:
+      sql = f"""
+            UPDATE mini.`board` 
+            SET `content` = '{boardEditModel.content}' WHERE `no` = {no}
+            """
+      if save(sql):
+         return{"status": True, "message":"게시글이 수정되었습니다."}
+   return{"status": False,"message":"게시글 수정중 오류발생"} 
+
+@router.delete("/{no}")
+def board(no: int, payload = Depends(get_user)):
+  if payload:
+    sql = f"UPDATE mini.`board` SET `del_yn` = 1 WHERE `no` = {no}"
+    if save(sql):
+      return {"status": True, "message": "게시글 삭제가 정상 처리가 되었습니다."}
+  return {"status": False, "message": "게시글 삭제 중 오류가 발생 되었습니다."}

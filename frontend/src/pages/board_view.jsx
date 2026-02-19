@@ -61,7 +61,7 @@ const Board_view = () => {
     }
 
     useEffect(() => {
-        api.post(`/board/${params.no}`)
+        api.get(`/board/${params.no}`)
             .then(res => {
                 if (res.data.status) {
                     set_data(res.data.result);

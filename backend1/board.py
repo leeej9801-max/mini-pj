@@ -16,6 +16,7 @@ class BoardSearchModel(BaseModel):
 
 
 class BoardEditModel(BaseModel):
+   title: str  = Field(..., title="내용", description="게시글에서 수정할 내용 입니다.")
    content: str  = Field(..., title="내용", description="게시글에서 수정할 내용 입니다.")
 
 # 댓글 전송을 위한 모델
@@ -73,7 +74,7 @@ def board(boardSearchModel: BoardSearchModel):
     return {"status": True, "result": result, "pagination": pagination}
   return {"status": False, "result": [], "pagination": pagination, "message": "게시글은 존재 하지 않습니다."}
 
-@router.post("/{no}")
+@router.get("/{no}")
 def board(no: int, payload = Depends(get_user)):
   sql = f"""SELECT b.`no`, b.`title`, b.`content`, u.`name`, b.`user_no`
       FROM mini.`board` AS b
@@ -141,7 +142,7 @@ def delete_reply(no: int, comment_no: int, payload = Depends(get_user)):
 
     # 본인의 댓글만 삭제할 수 있도록 user_no 조건을 추가합니다.
     user_no = payload["sub"]
-    sql = f"UPDATE mini.`reply` SET `del_yn` = 0 WHERE `no` = {comment_no} AND `user_no` = {user_no}"
+    sql = f"UPDATE mini.`reply` SET `del_yn` = 1 WHERE `no` = {comment_no} AND `user_no` = {user_no}"
     
     res = save(sql)
     if res:
@@ -163,19 +164,32 @@ def edit_comment(no: int, comment_no: int, commentEditModel: CommentEditModel, p
   result = save(f"UPDATE mini.reply SET content='{commentEditModel.content}', mod_date=NOW() WHERE no={comment_no}")
   if result:
     return {"status": True, "message": "댓글 수정 완료"}
-    return {"status": False, "message": "댓글 수정 실패"}
+  return {"status": False, "message": "댓글 수정 실패"}
+
+@router.patch("/{no}")
+def edit_data(no: int, boardEditModel: BoardEditModel, payload = Depends(get_user)):
+   if not payload:
+      return {"status": False, "message": "로그인이 필요합니다."}
+
+   user_no = int(payload["sub"])
+
+   check = findOne(f"SELECT user_no FROM mini.board WHERE no={no} AND del_yn=0")
+   if not check or check["user_no"] != user_no:
+      return {"status": False, "message": "수정 권한이 없습니다."}
+
+   sql = f"""
+        UPDATE mini.`board`
+        SET `title` = '{boardEditModel.title}',
+            `content` = '{boardEditModel.content}'
+        WHERE `no` = {no}
+   """
+
+   if save(sql):
+      return {"status": True, "message": "게시글이 수정되었습니다."}
+
+   return {"status": False, "message": "게시글 수정 실패"}
 
 
-@router.patch("/edit")
-def edit_data(no: int, boardEditModel: BoardEditModel, playload = Depends(get_user)):
-   if playload:
-      sql = f"""
-            UPDATE mini.`board` 
-            SET `content` = '{boardEditModel.content}' WHERE `no` = {no}
-            """
-      if save(sql):
-         return{"status": True, "message":"게시글이 수정되었습니다."}
-   return{"status": False,"message":"게시글 수정중 오류발생"} 
 
 @router.delete("/{no}")
 def board(no: int, payload = Depends(get_user)):

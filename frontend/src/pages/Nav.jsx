@@ -1,38 +1,19 @@
 import { Link } from "react-router";
 import { useAuth } from "@hooks/AuthProvider.jsx";
-import { useEffect, useState } from "react"
-import { api } from '@/utils/network.js';
+import { BASE_URL } from "@utils/network.js";
 
 const Nav = () => {
-  const { isLogin, removeAuth } = useAuth();
-  const [ profile, setProfile] = useState(0)
+  const { isLogin, removeAuth, profileImg } = useAuth();
 
-  const path = "http://localhost:8001/"
-
-
-  const getUrl = () => {
-	if (profile && profile > 0)
-	  return `${path}/profile?no=${profile}`
-	else
-	  return "/img_01.jpg"
-  }
-
-  useEffect(() => {
-    api.post("/user")
-      .then(res => {
-        if (res.data.status) {
-          setProfile(res.data.result.profile ?? 0)
-        }
-      })
-      .catch(err => console.error(err))
-  }, [])
-
-
+  const imageUrl = profileImg
+    ? `${BASE_URL}/uploads/${profileImg}?t=${Date.now()}`
+    : "/img_01.jpg";
 
   return (
     <nav className="navbar navbar-expand-lg bg-body-tertiary">
       <div className="container-fluid">
         <Link className="navbar-brand" to="/">Team1</Link>
+
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav me-auto">
             {!isLogin && (
@@ -59,13 +40,13 @@ const Nav = () => {
               </>
             )}
           </ul>
+
           <img
-          src={getUrl()}
-           className="border user_pt_nav mt-1 object-fit-cover"
-          style={{ width: "40px", height: "40px" }}
-          alt="profile"
-        />
-        
+            src={imageUrl}
+            className="border user_pt_nav mt-1 object-fit-cover rounded-circle"
+            style={{ width: "40px", height: "40px" }}
+            alt="profile"
+          />
         </div>
       </div>
     </nav>

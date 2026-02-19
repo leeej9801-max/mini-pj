@@ -1,8 +1,11 @@
 import axios from "axios"
 
+export const BASE_URL = import.meta.env.VITE_API_URL;
+
+
 export const api = axios.create({
   
-  baseURL: import.meta.env.VITE_APP_FASTAPI_URL || "http://localhost:8001",
+  baseURL: BASE_URL || "http://localhost:8001",
   withCredentials: true,
   
   headers: {
@@ -12,7 +15,7 @@ export const api = axios.create({
 
 export const formApi = axios.create({
   
-  baseURL: import.meta.env.VITE_APP_FASTAPI_URL || "http://localhost:8001",
+  baseURL: BASE_URL || "http://localhost:8001",
   withCredentials: true,
   
   headers: {

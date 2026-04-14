@@ -83,6 +83,7 @@ const Board_view = () => {
     }, [params.no]);
 
     const reply_submit = () => {
+        // 댓글이 비어 있거나 공백만 입력되었으면 alert로 가서 표현하시오.
         if (!new_reply.trim()) return alert("댓글 내용을 입력하세요.");
         api.post(`/board/${params.no}/comment/add`, { 
             content: new_reply, 
@@ -100,7 +101,7 @@ const Board_view = () => {
     };
 
     const reply_delete = (comment_no) => {
-        if (!window.confirm("댓글을 삭제하시겠습니까?")) return
+        if (!confirm("댓글을 삭제하시겠습니까?")) return
         api.delete(`/board/${params.no}/comment/${comment_no}`)
             .then(res => {
                 alert(res.data.message)

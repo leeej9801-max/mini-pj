@@ -22,7 +22,7 @@ def user(payload = Depends(get_user)):
     if result:
       role = True
     return {"status": True, "result": result, "role": role}
-  return {"status": False, "message": "요청하신 게시글은 존재 하지 않습니다."}
+  return {"status": False, "message": "요청하신 사용자 정보는 존재 하지 않습니다."}
 
 @router.patch("")
 def user(userModel: UserModel, payload = Depends(get_user)):

@@ -106,12 +106,12 @@ def get_replies(no: int, payload = Depends(get_user)):
     """
     result = findAll(sql)
     
-    # 각 댓글의 작성자가 현재 로그인한 사용자인지 확인하여 role 부여
+    # 각 댓글의 작성자가 현재 로그인한 사용자인지 확인하여 isOwner 부여
     for item in result:
         if payload and int(payload["sub"]) == item["user_no"]:
-            item['role'] = True
+            item['isOwner'] = True
         else:
-            item['role'] = False
+            item['isOwner'] = False
             
     return {"status": True, "result": result}
 
